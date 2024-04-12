@@ -1,0 +1,13 @@
+.row {
+    display: flex;
+    flex-direction: row;
+}
+
+.cell {
+    margin: 6px;
+    height: 100px;
+    width: 100px;
+    border: 1px solid;
+    border-radius: 8px;
+    background-color: aliceblue;
+}
