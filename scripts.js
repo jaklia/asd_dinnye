@@ -5,6 +5,7 @@ var H = 20;
 var CELL_HEIGHT = 20;
 var WIDTH = CELL_HEIGHT * (W + 2);
 var HEIGHT = CELL_HEIGHT * (H + 2);
+var rs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((e) => e * 2 * Math.SQRT2)
 
 class Pos {
     constructor(x = 0, y = 0) {
@@ -50,7 +51,8 @@ class Fruit {
         this.pos = pos
         this.lastPos = pos// new Pos(pos.x, pos.y - 2)
         // this.v = v
-        this.r = r
+        this.r = rs[r]
+        this.ri = r
         this.m = m
     }
     step() {
@@ -61,69 +63,67 @@ class Fruit {
         // console.log(`asd  diff after:  ${diff.x} ${diff.y} `)
 
         this.lastPos = this.pos
-        diff.multiply(0.8)
-        this.pos = new Pos(this.pos.x + diff.x, this.pos.y + diff.y + 4)
+        diff.multiply(0.6)  //  cooling?
+        this.pos = new Pos(this.pos.x + diff.x, this.pos.y + diff.y + 5)
         //console.log(this.pos.y)
     }
     collide(other) {
         let dist = this.pos.distance(other.pos)
 
         if (dist <= this.r + other.r) {
-            if (this.r === other.r) {
-                //
-            } else {
-                let diff = this.r + other.r - dist
-                let a1 =/* 1 * diff * */other.r / (this.r + other.r)
-                let a2 =/* 1 * diff * */this.r / (this.r + other.r)
-                console.log(`diff: ${diff}, a1: ${a1}, a2: ${a2}`)
+            // if (this.ri === other.ri) {
+            //    this.lastPos = this.pos.copy()
 
-                // let p1 = this.pos.newDiff(this.lastPos)
-                // let p2 = other.pos.newDiff(other.lastPos)
-                // let d1 = p1.newDiff(p2).multiply(a1)
-                // let d2 = p2.newDiff(p1).multiply(a2)
+            //    return true
+            // } else {
+            let diff = this.r + other.r - dist
+            let a1 =/* 1 * diff * */other.r / (this.r + other.r)
+            let a2 =/* 1 * diff * */this.r / (this.r + other.r)
+            console.log(`diff: ${diff}, a1: ${a1}, a2: ${a2}`)
 
-                let v1 = this.pos.newDiff(this.lastPos)
-                let v2 = other.pos.newDiff(other.lastPos)
+            // let p1 = this.pos.newDiff(this.lastPos)
+            // let p2 = other.pos.newDiff(other.lastPos)
+            // let d1 = p1.newDiff(p2).multiply(a1)
+            // let d2 = p2.newDiff(p1).multiply(a2)
 
-                let u1 = v1.newMultiply((this.r - other.r) / (this.r + other.r)).add(
-                    v2.newMultiply((2 * other.r) / (this.r + other.r))
-                )
-                let u2 = v2.newMultiply((other.r - this.r) / (this.r + other.r)).add(
-                    v1.newMultiply((2 * this.r) / (this.r + other.r))
-                )
-                // let d1 = u1//.multiply(0.5)
-                // let d2 = u2//.multiply(0.5)
+            let v1 = this.pos.newDiff(this.lastPos)
+            let v2 = other.pos.newDiff(other.lastPos)
 
-                u1.multiply(0.05)
-                u2.multiply(0.05)
+            let u1 = v1.newMultiply((this.r - other.r) / (this.r + other.r)).add(
+                v2.newMultiply((2 * other.r) / (this.r + other.r))
+            )
+            let u2 = v2.newMultiply((other.r - this.r) / (this.r + other.r)).add(
+                v1.newMultiply((2 * this.r) / (this.r + other.r))
+            )
+            // let d1 = u1//.multiply(0.5)
+            // let d2 = u2//.multiply(0.5)
+
+            u1.multiply(0.05)
+            u2.multiply(0.05)
+
+            let d1 = this.pos.newDiff(other.pos).multiply(a1 * 0.05)//.add(u1).multiply(0.2)
+            let d2 = other.pos.newDiff(this.pos).multiply(a2 * 0.05)//.add(u2).multiply(0.2)
+            console.log('1')
+            console.log(`d1(${d1.x},${d1.y}) `)
+            console.log(`d2(${d2.x},${d2.y}) `)
+
+            console.log('2')
 
 
-                let d1 = this.pos.newDiff(other.pos).multiply(a1).add(u1)
-                let d2 = other.pos.newDiff(this.pos).multiply(a2).add(u2)
-                console.log('1')
-                console.log(`d1(${d1.x},${d1.y}) `)
-                console.log(`d2(${d2.x},${d2.y}) `)
+            this.lastPos = this.pos.copy().diff(d1)
 
-                console.log('2')
-                let randomX = Math.random() - 0.5
+            //d1.multiply(0.8)
+            this.pos.add(d1)
+            console.log('3')
 
-                    // this.lastPos = this.pos.copy()
-                    // if (d1.x == 0) {
-                    //     d1.x = randomX
-                    // }
-                    / d1.multiply(0.2)
-                this.pos.add(d1)
-                console.log('3')
+            other.lastPos = other.pos.copy().diff(d2)
 
-                // other.lastPos = other.pos.copy()
-                // if (d2.x == 0) {
-                //     d2.x = -randomX
-                // }
-                d2.multiply(0.2)
-                other.pos.add(d2)
-                console.log('3')
-            }
+            // d2.multiply(0.8)
+            other.pos.add(d2)
+            console.log('3')
+            // }
         }
+        return false
     }
     keepInside(maxX, maxY) {
         if (this.pos.x < this.r) {
@@ -140,32 +140,33 @@ class Fruit {
         }
     }
 }
+
 class Scene {
     constructor() {
         this.fruits = [
             // new Fruit(new Pos(101, 150), 4, 1),
             // new Fruit(new Pos(103, 400), 10, 1),
 
-            new Fruit(new Pos(100, 100), 4, 1),
-            new Fruit(new Pos(100, 150), 6, 1),
-            new Fruit(new Pos(100, 200), 8, 1),
-            new Fruit(new Pos(100, 250), 10, 1),
-            new Fruit(new Pos(100, 300), 12, 1),
-            new Fruit(new Pos(100, 350), 14, 1),
+            new Fruit(new Pos(100, 100), 1, 1),
+            new Fruit(new Pos(100, 150), 2, 1),
+            new Fruit(new Pos(100, 200), 4, 1),
+            new Fruit(new Pos(100, 250), 7, 1),
+            new Fruit(new Pos(100, 300), 8, 1),
+            new Fruit(new Pos(100, 350), 9, 1),
             //
-            new Fruit(new Pos(50, 105), 5, 1),
-            new Fruit(new Pos(33, 155), 30, 1),
-            new Fruit(new Pos(50, 205), 9, 1),
-            new Fruit(new Pos(70, 255), 13, 1),
-            new Fruit(new Pos(50, 305), 15, 1),
-            new Fruit(new Pos(50, 355), 17, 1),
+            new Fruit(new Pos(50, 105), 2, 1),
+            new Fruit(new Pos(33, 155), 9, 1),
+            new Fruit(new Pos(50, 205), 1, 1),
+            new Fruit(new Pos(70, 255), 8, 1),
+            new Fruit(new Pos(50, 305), 3, 1),
+            new Fruit(new Pos(50, 355), 7, 1),
             //
-            new Fruit(new Pos(156, 50), 20, 1),
-            new Fruit(new Pos(156, 90), 17, 1),
-            new Fruit(new Pos(180, 150), 20, 1),
-            new Fruit(new Pos(156, 218), 16, 1),
-            new Fruit(new Pos(200, 308), 25, 1),
-            new Fruit(new Pos(156, 358), 17, 1),
+            new Fruit(new Pos(156, 50), 0, 1),
+            new Fruit(new Pos(156, 90), 7, 1),
+            new Fruit(new Pos(180, 150), 6, 1),
+            new Fruit(new Pos(156, 218), 5, 1),
+            new Fruit(new Pos(200, 308), 2, 1),
+            new Fruit(new Pos(156, 358), 4, 1),
         ]
     }
     step() {
@@ -180,6 +181,7 @@ class Scene {
             //  wtf, black magic here
             for (let i = 0; i < this.fruits.length - 1; ++i) {
                 for (let j = 0; j < this.fruits.length; ++j) {
+                    if (i === j) continue
                     this.fruits[i].collide(this.fruits[j])
                 }
             }
