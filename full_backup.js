@@ -1,5 +1,5 @@
 
-
+//  stuff with this settings looks kinda ok
 var W = 10;
 var H = 20;
 var CELL_HEIGHT = 20;
