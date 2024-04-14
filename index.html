@@ -8,6 +8,7 @@
     <title>2048</title>
     <script src="scripts.js" ></script>
     <link rel="stylesheet" href="styles.css">
+    
 </head>
 
 <body onload="onLoad()" >
@@ -16,11 +17,11 @@
 
         <div style="display: flex; flex-direction: column;">
             <div style="padding: 12px 0px">
-                <input type="button" onclick="reset()" value="reset"></input>
-                <input type="button" onclick="start()" value="start"></input>
+              <input type="button" onclick="reset()" value="reset"></input>
+                <!-- <input type="button" onclick="start()" value="start"></input> -->
             </div>
             <div>
-                <canvas id="cv" width="300" height="400" ></canvas>
+                <canvas id="cv" width="300" height="400" onclick="onCanvasClick()" ></canvas>
                 <div>asd</div>
             </div>
         </div>

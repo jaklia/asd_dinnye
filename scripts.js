@@ -1,8 +1,21 @@
 
 
-var WIDTH = 300;
-var HEIGHT = 400;
+const WIDTH = 300;
+const HEIGHT = 400;
+const Y_ZERO = 60;
 var rs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((e) => e ** 1.23 * 3 * Math.SQRT2)
+// colors by the AI in Edge
+var colors = ['#F44336',
+    '#E91E63',
+    '#9C27B0',
+    '#673AB7',
+    '#3F51B5',
+    '#2196F3',
+    '#03A9F4',
+    '#00BCD4',
+    '#009688',
+    '#4CAF50']
+
 
 class Pos {
     constructor(x = 0, y = 0) {
@@ -46,14 +59,13 @@ class Pos {
 class Fruit {
     constructor(pos, r, m) {
         this.pos = pos
-        this.lastPos = pos// new Pos(pos.x, pos.y - 2)
-        // this.v = v
+        this.lastPos = pos // new Pos(pos.x, pos.y - 2) 
         this.r = rs[r]
         this.ri = r
         this.m = m
     }
     step() {
-        console.log(`fruit step: ${this.r}`)
+        //console.log(`fruit step: ${this.r}`)
         let diff = this.pos.newDiff(this.lastPos)
         // console.log(`asd  diff before:  ${diff.x} ${diff.y} `)
         // diff.diff(this.lastPos)
@@ -72,7 +84,7 @@ class Fruit {
         if (dist <= this.r + other.r) {
             if (this.ri === other.ri) {
                 //  this.lastPos = this.pos.copy()
-                this.pos.add(other.pos.newDiff(this.pos).multiply(1.2))
+                this.pos.add(other.pos.newDiff(this.pos)/*.multiply(1.2)*/)
                 this.ri = (this.ri + 1) % rs.length
                 this.r = rs[this.ri]
                 return true
@@ -80,37 +92,31 @@ class Fruit {
                 let diff = this.r + other.r - dist
                 let a1 =/* 1 * diff * */other.r / (this.r + other.r)
                 let a2 =/* 1 * diff * */this.r / (this.r + other.r)
-                console.log(`diff: ${diff}, a1: ${a1}, a2: ${a2}`)
+                //console.log(`diff: ${diff}, a1: ${a1}, a2: ${a2}`)
 
-                let v1 = this.pos.newDiff(this.lastPos)
-                let v2 = other.pos.newDiff(other.lastPos)
+                //  TODO:  not used now, maybe needed later
+                // let v1 = this.pos.newDiff(this.lastPos)
+                // let v2 = other.pos.newDiff(other.lastPos)
 
-                let u1 = v1.newMultiply((this.r - other.r) / (this.r + other.r)).add(
-                    v2.newMultiply((2 * other.r) / (this.r + other.r))
-                )
-                let u2 = v2.newMultiply((other.r - this.r) / (this.r + other.r)).add(
-                    v1.newMultiply((2 * this.r) / (this.r + other.r))
-                )
-
-                u1.multiply(0.05)
-                u2.multiply(0.05)
+                /* let u1 = v1.newMultiply((this.r - other.r) / (this.r + other.r)).add(
+                     v2.newMultiply((2 * other.r) / (this.r + other.r))
+                 )
+                 let u2 = v2.newMultiply((other.r - this.r) / (this.r + other.r)).add(
+                     v1.newMultiply((2 * this.r) / (this.r + other.r))
+                 )
+                 u1.multiply(0.05)
+                 u2.multiply(0.05)*/
 
                 let d1 = this.pos.newDiff(other.pos).multiply(a1 * 0.05)//.add(u1).multiply(0.2)
                 let d2 = other.pos.newDiff(this.pos).multiply(a2 * 0.05)//.add(u2).multiply(0.2)
-                console.log('1')
-                console.log(`d1(${d1.x},${d1.y}) `)
-                console.log(`d2(${d2.x},${d2.y}) `)
-
-                console.log('2')
-
+                // console.log(`d1(${d1.x},${d1.y}) `)
+                // console.log(`d2(${d2.x},${d2.y}) `)
 
                 this.lastPos = this.pos.copy().diff(d1)
                 this.pos.add(d1)
-                console.log('3')
 
                 other.lastPos = other.pos.copy().diff(d2)
                 other.pos.add(d2)
-                console.log('3')
             }
         }
         return false
@@ -125,49 +131,30 @@ class Fruit {
             this.pos.x = maxX - this.r
         }
         if (this.pos.y > maxY - this.r) {
-            this.lastPos = this.pos.copy()
+            let d_y = this.pos.y - this.lastPos.y
+            // this.lastPos = this.pos.copy()
             this.pos.y = maxY - this.r
+            this.lastPos.y = this.pos.y + d_y
         }
     }
 }
 
 class Scene {
     constructor() {
-        // this.fruits = [
-        //     new Fruit(new Pos(101, 50), 1, 1),
-        //     new Fruit(new Pos(101, 230), 8, 1),
+        this.dropPoint = WIDTH / 2
+        this.nextItem = Math.floor(Math.random() * 5)
 
-        //     new Fruit(new Pos(100, 100), 1, 1),
-        //     new Fruit(new Pos(100, 150), 2, 1),
-        //     new Fruit(new Pos(100, 200), 4, 1),
-        //     new Fruit(new Pos(100, 250), 7, 1),
-        //     new Fruit(new Pos(100, 300), 8, 1),
-        //     new Fruit(new Pos(100, 350), 9, 1),
-        //     //
-        //     new Fruit(new Pos(50, 105), 2, 1),
-        //     new Fruit(new Pos(33, 155), 9, 1),
-        //     new Fruit(new Pos(50, 205), 1, 1),
-        //     new Fruit(new Pos(70, 255), 8, 1),
-        //     new Fruit(new Pos(50, 305), 3, 1),
-        //     new Fruit(new Pos(50, 355), 7, 1),
-        //     //
-        //     new Fruit(new Pos(156, 50), 0, 1),
-        //     new Fruit(new Pos(156, 90), 7, 1),
-        //     new Fruit(new Pos(180, 150), 6, 1),
-        //     new Fruit(new Pos(156, 218), 5, 1),
-        //     new Fruit(new Pos(200, 308), 2, 1),
-        //     new Fruit(new Pos(156, 358), 4, 1),
-        // ]
         // generate random fruits, 
         // need less from the bigger ones, and more from the smaller ones
+        //  well, turns out, the +1  at the end is really important...  
         this.fruits = null
-        this.fruits = Array(80).fill().map((i) => {
-            let r = Math.floor(5 - Math.log2(Math.random() * (2 ** 5)))
-            console.log(r)
+        this.fruits = Array(3).fill().map((i) => {
+            let r = Math.floor(5 - Math.log2(Math.random() * (2 ** 5) + 1))
+            // console.log(r)
             return new Fruit(
                 new Pos(
-                    Math.random() * (WIDTH - 2 * r) + r,
-                    Math.random() * (HEIGHT - 100 - 2 * r) + r
+                    Math.random() * (WIDTH - 2 * rs[4]) + rs[4],
+                    Math.random() * (HEIGHT - 100 - 2 * rs[4]) + rs[4] + Y_ZERO
                 ),
                 r,
                 1
@@ -175,14 +162,12 @@ class Scene {
         },)
     }
     step() {
-        console.log('scene step')
+        // console.log('scene step')
         for (let f of this.fruits) {
             f.step()
         }
 
-
         for (let it = 1; it <= 20; ++it) {
-
             //  wtf, black magic here
             for (let i = 0; i < this.fruits.length - 1; ++i) {
                 for (let j = 0; j < this.fruits.length; ++j) {
@@ -202,21 +187,56 @@ class Scene {
             }
         }
     }
+    setDropPoint(x) {
+        this.dropPoint = x
+    }
+    randomizeNext() {
+        this.nextItem = Math.floor(Math.random() * 5)
+        console.log(`next item will be: ${this.nextItem}`)
+    }
+    dropNextFruit() {
+        console.log('item dropped')
+        this.fruits.push(new Fruit(
+            new Pos(this.dropPoint, Y_ZERO / 2),
+            this.nextItem,
+            1
+        ))
+        this.randomizeNext()
+    }
 }
-
 
 var scene
 var canvas = document.getElementById('cv');
 var ctx //= canvas.getContext('2d');
 var timer
 
+function onCanvasClick(e) {
+    if (!timer) {
+        start()
+    }
+    scene && scene.dropNextFruit()
+    drawNext(scene.nextItem)
+}
+
+function mouseMoveHandler(e) {
+    var relativeX = e.clientX - canvas.offsetLeft;
+    var relativeY = e.clientY - canvas.offsetTop;
+    if (relativeX > 0 && relativeX < canvas.width &&
+        relativeY > 0 && relativeY < canvas.height) {
+        scene && scene.setDropPoint(relativeX)
+        reDrawTopPart(relativeX, scene.nextItem)
+    }
+}
+
 function onLoad() {
     canvas = document.getElementById('cv');
     ctx = canvas.getContext('2d');
     reset();
+    document.addEventListener("mousemove", mouseMoveHandler, false);
 
 }
 function start() {
+    clearInterval(timer)
     timer = setInterval(() => {
         scene.step()
         // for (let f of scene.fruits) {
@@ -227,54 +247,75 @@ function start() {
         // reDrawScene()
     }, 50)
 }
-
 function reset() {
     clearInterval(timer)
-
-    console.log('a1')
-    scene = new Scene()
-
+    timer = null
+    console.log('-- RESET ----------')
     canvas = document.getElementById('cv');
     ctx = canvas.getContext('2d');
-    //  clear();
-    // for (let i = 0; i < H + 2; ++i) {
-    //     drawCell(0, i * CELL_HEIGHT, '#999');
-    //     drawCell((W + 1) * CELL_HEIGHT, i * CELL_HEIGHT, '#999');
-    // }
-    // for (let i = 1; i < W + 1; ++i) {
-    //     drawCell(i * CELL_HEIGHT, 0, '#999');
-    //     drawCell(i * CELL_HEIGHT, (H + 1) * CELL_HEIGHT, '#999');
-    // }
-    console.log(scene.fruits)
+    // console.log(scene.fruits)
+    scene = new Scene()
     reDrawScene()
-
 }
 
 function reDrawScene() {
     clear()
+    drawTriangle(scene.dropPoint)
     for (let f of scene.fruits) {
         drawFruit(f)
     }
+    drawNext(scene.nextItem)
 }
 
 function drawFruit(a) {
     ctx.beginPath();
-    // ctx.fillStyle = 'blue';
-    ctx.strokeStyle = 'blue';
-    ctx.arc(a.pos.x, a.pos.y, a.r, 0, 2 * Math.PI);
-    // ctx.fill();
+    ctx.strokeStyle = colors[a.ri];
+    ctx.fillStyle = `${colors[a.ri]}88`
+    ctx.arc(a.pos.x, a.pos.y, a.r, 0, 2 * Math.PI)
+    ctx.closePath()
+    ctx.stroke()
+    ctx.fill()
+}
 
-    // ctx.fillStyle = '#888';
-    // ctx.lineWidth = 1;
-    // ctx.rect(x, y, CELL_HEIGHT, CELL_HEIGHT/*, 0, 0, 2 * Math.PI*/);
-    ctx.stroke();
-    //ctx.closePath();
+function drawTriangle(x) {
+    ctx.beginPath()
+    ctx.strokeStyle = '#fafafa'
+    ctx.fillStyle = '#fafafa88'
+    ctx.moveTo(x - 4, Y_ZERO - 8)
+    ctx.lineTo(x + 4, Y_ZERO - 8)
+    ctx.lineTo(x, Y_ZERO - 4)
+    ctx.closePath()
+    ctx.fill()
+    ctx.stroke()
+}
+
+function reDrawTopPart(triangleX, nextItem) {
+    ctx.beginPath();
+    ctx.fillStyle = '#111';
+    ctx.rect(0, 0, WIDTH, Y_ZERO - 2, 0, 0, 2 * Math.PI);
+    ctx.fill();
+    drawTriangle(triangleX)
+    drawNext(nextItem)
 }
 
 function clear() {
     ctx.beginPath();
-    ctx.fillStyle = '#ccc';
+    ctx.fillStyle = '#111';
     ctx.rect(0, 0, WIDTH, HEIGHT, 0, 0, 2 * Math.PI);
     ctx.fill();
-    ctx.closePath();
+    ctx.moveTo(0, Y_ZERO);
+    ctx.strokeStyle = '#bbb'
+    ctx.lineTo(WIDTH, Y_ZERO)
+    ctx.stroke()
+    // ctx.closePath();
+}
+
+function drawNext(ri) {
+    ctx.beginPath();
+    ctx.strokeStyle = colors[ri];
+    ctx.fillStyle = `${colors[ri]}88`
+    ctx.arc(WIDTH - rs[ri] - 4, Y_ZERO / 2, rs[ri], 0, 2 * Math.PI)
+    ctx.closePath()
+    ctx.stroke()
+    ctx.fill()
 }
