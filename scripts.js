@@ -1,9 +1,7 @@
-
-
 const WIDTH = 300;
 const HEIGHT = 400;
 const Y_ZERO = 60;
-var rs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((e) => e ** 1.23 * 3 * Math.SQRT2)
+var rs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((e) => e ** 1.234 * 3.2 * Math.SQRT2)
 // colors by the AI in Edge
 var colors = ['#F44336',
     '#E91E63',
@@ -15,7 +13,6 @@ var colors = ['#F44336',
     '#00BCD4',
     '#009688',
     '#4CAF50']
-
 
 class Pos {
     constructor(x = 0, y = 0) {
@@ -70,21 +67,16 @@ class Fruit {
         // console.log(`asd  diff before:  ${diff.x} ${diff.y} `)
         // diff.diff(this.lastPos)
         // console.log(`asd  diff after:  ${diff.x} ${diff.y} `)
-
         this.lastPos = this.pos
         diff.multiply(0.6)  //  cooling?
-
-        this.pos = new Pos(this.pos.x + diff.x, this.pos.y + diff.y + 5)
-
-        //console.log(this.pos.y)
+        this.pos = new Pos(this.pos.x + diff.x, this.pos.y + diff.y + 6)
     }
     collide(other) {
         let dist = this.pos.distance(other.pos)
 
         if (dist <= this.r + other.r) {
             if (this.ri === other.ri) {
-                //  this.lastPos = this.pos.copy()
-                this.pos.add(other.pos.newDiff(this.pos)/*.multiply(1.2)*/)
+                this.pos.add(other.pos.newDiff(this.pos).multiply(0.5))
                 this.ri = (this.ri + 1) % rs.length
                 this.r = rs[this.ri]
                 return true
@@ -123,16 +115,15 @@ class Fruit {
     }
     keepInside(maxX, maxY) {
         if (this.pos.x < this.r) {
-            this.lastPos = this.pos.copy()
+            // this.lastPos = this.pos.copy()
             this.pos.x = this.r
         }
         if (this.pos.x > maxX - this.r) {
-            this.lastPos = this.pos.copy()
+            //this.lastPos = this.pos.copy()
             this.pos.x = maxX - this.r
         }
         if (this.pos.y > maxY - this.r) {
             let d_y = this.pos.y - this.lastPos.y
-            // this.lastPos = this.pos.copy()
             this.pos.y = maxY - this.r
             this.lastPos.y = this.pos.y + d_y
         }
@@ -148,7 +139,7 @@ class Scene {
         // need less from the bigger ones, and more from the smaller ones
         //  well, turns out, the +1  at the end is really important...  
         this.fruits = null
-        this.fruits = Array(3).fill().map((i) => {
+        this.fruits = Array(16).fill().map((i) => {
             let r = Math.floor(5 - Math.log2(Math.random() * (2 ** 5) + 1))
             // console.log(r)
             return new Fruit(
@@ -233,27 +224,20 @@ function onLoad() {
     ctx = canvas.getContext('2d');
     reset();
     document.addEventListener("mousemove", mouseMoveHandler, false);
-
 }
 function start() {
     clearInterval(timer)
     timer = setInterval(() => {
         scene.step()
-        // for (let f of scene.fruits) {
-        //     //f.y += scene.g
-        //     f.step(scene.g)
-        // }
         requestAnimationFrame(reDrawScene)
-        // reDrawScene()
-    }, 50)
+    }, 40)
 }
 function reset() {
+    console.log('-- RESET ----------')
     clearInterval(timer)
     timer = null
-    console.log('-- RESET ----------')
     canvas = document.getElementById('cv');
     ctx = canvas.getContext('2d');
-    // console.log(scene.fruits)
     scene = new Scene()
     reDrawScene()
 }
@@ -307,7 +291,6 @@ function clear() {
     ctx.strokeStyle = '#bbb'
     ctx.lineTo(WIDTH, Y_ZERO)
     ctx.stroke()
-    // ctx.closePath();
 }
 
 function drawNext(ri) {
