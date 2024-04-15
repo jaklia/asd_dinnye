@@ -73,27 +73,24 @@ class Fruit {
     }
     collide(other) {
         let dist = this.pos.distance(other.pos)
-        let rsum = this.r + other.r
 
-        if (dist <= rsum) {
+        if (dist <= this.r + other.r) {
             if (this.ri === other.ri) {
                 this.pos.add(other.pos.newDiff(this.pos).multiply(0.5))
                 this.ri = (this.ri + 1) % rs.length
                 this.r = rs[this.ri]
                 return true
             } else {
-                let diff = rsum - dist
-                let a1 = 2 * diff * other.r / rsum ** 2
-                let a2 = 2 * diff * this.r / rsum ** 2
-                // let a1 = diff / rsum
-                // let a2 = diff / rsum
+                let diff = this.r + other.r - dist
+                let a1 =/* 1 * diff * */other.r / (this.r + other.r)
+                let a2 =/* 1 * diff * */this.r / (this.r + other.r)
                 //console.log(`diff: ${diff}, a1: ${a1}, a2: ${a2}`)
 
-                //  TODO:  not used now, maybe needed later (was trying to consider the velocity of the balls)
-                /* let v1 = this.pos.newDiff(this.lastPos)
-                 let v2 = other.pos.newDiff(other.lastPos)
- 
-                 let u1 = v1.newMultiply((this.r - other.r) / (this.r + other.r)).add(
+                //  TODO:  not used now, maybe needed later
+                // let v1 = this.pos.newDiff(this.lastPos)
+                // let v2 = other.pos.newDiff(other.lastPos)
+
+                /* let u1 = v1.newMultiply((this.r - other.r) / (this.r + other.r)).add(
                      v2.newMultiply((2 * other.r) / (this.r + other.r))
                  )
                  let u2 = v2.newMultiply((other.r - this.r) / (this.r + other.r)).add(
@@ -102,17 +99,15 @@ class Fruit {
                  u1.multiply(0.05)
                  u2.multiply(0.05)*/
 
-                // TODO:  swap `a1` and `a2` below, to make it look like bubbles
-                //  (the smaller bubbles will "fall" to the bottom, even between the bigger ones)
-                let d1 = this.pos.newDiff(other.pos).multiply(a1)//.add(u1).multiply(0.2)
-                let d2 = other.pos.newDiff(this.pos).multiply(a2)//.add(u2).multiply(0.2)
+                let d1 = this.pos.newDiff(other.pos).multiply(a1 * 0.05)//.add(u1).multiply(0.2)
+                let d2 = other.pos.newDiff(this.pos).multiply(a2 * 0.05)//.add(u2).multiply(0.2)
                 // console.log(`d1(${d1.x},${d1.y}) `)
                 // console.log(`d2(${d2.x},${d2.y}) `)
 
-                //this.lastPos = this.pos.copy().diff(d1)
+                this.lastPos = this.pos.copy().diff(d1)
                 this.pos.add(d1)
 
-                //other.lastPos = other.pos.copy().diff(d2)
+                other.lastPos = other.pos.copy().diff(d2)
                 other.pos.add(d2)
             }
         }
@@ -144,7 +139,7 @@ class Scene {
         // need less from the bigger ones, and more from the smaller ones
         //  well, turns out, the +1  at the end is really important...  
         this.fruits = null
-        this.fruits = Array(16).fill().map((_) => {
+        this.fruits = Array(16).fill().map((i) => {
             let r = Math.floor(5 - Math.log2(Math.random() * (2 ** 5) + 1))
             // console.log(r)
             return new Fruit(
@@ -163,7 +158,7 @@ class Scene {
             f.step()
         }
 
-        for (let it = 1; it <= 16; ++it) {
+        for (let it = 1; it <= 20; ++it) {
             //  wtf, black magic here
             for (let i = 0; i < this.fruits.length - 1; ++i) {
                 for (let j = 0; j < this.fruits.length; ++j) {
@@ -259,7 +254,7 @@ function reDrawScene() {
 function drawFruit(a) {
     ctx.beginPath();
     ctx.strokeStyle = colors[a.ri];
-    ctx.fillStyle = `${colors[a.ri]}66`
+    ctx.fillStyle = `${colors[a.ri]}88`
     ctx.arc(a.pos.x, a.pos.y, a.r, 0, 2 * Math.PI)
     ctx.closePath()
     ctx.stroke()
@@ -268,8 +263,8 @@ function drawFruit(a) {
 
 function drawTriangle(x) {
     ctx.beginPath()
-    ctx.strokeStyle = '#fafafaee'
-    ctx.fillStyle = '#fafafa66'
+    ctx.strokeStyle = '#fafafa'
+    ctx.fillStyle = '#fafafa88'
     ctx.moveTo(x - 4, Y_ZERO - 8)
     ctx.lineTo(x + 4, Y_ZERO - 8)
     ctx.lineTo(x, Y_ZERO - 4)
@@ -279,12 +274,10 @@ function drawTriangle(x) {
 }
 
 function reDrawTopPart(triangleX, nextItem) {
-    ctx.beginPath()
-    ctx.fillStyle = '#111'
-    // ctx.strokeStyle = '#fafafa66'
-    ctx.rect(1, 1, WIDTH - 2, Y_ZERO - 2)
-    ctx.fill()
-    // ctx.stroke()
+    ctx.beginPath();
+    ctx.fillStyle = '#111';
+    ctx.rect(1, 1, WIDTH - 2, Y_ZERO - 2);
+    ctx.fill();
     drawTriangle(triangleX)
     drawNext(nextItem)
 }
@@ -304,7 +297,7 @@ function clear() {
 function drawNext(ri) {
     ctx.beginPath();
     ctx.strokeStyle = colors[ri];
-    ctx.fillStyle = `${colors[ri]}66`
+    ctx.fillStyle = `${colors[ri]}88`
     ctx.arc(WIDTH - rs[ri] - 4, Y_ZERO / 2, rs[ri], 0, 2 * Math.PI)
     ctx.closePath()
     ctx.stroke()

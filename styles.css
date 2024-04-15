@@ -1,13 +1,17 @@
-.row {
+.col {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
 }
 
-.cell {
-    margin: 6px;
-    height: 100px;
-    width: 100px;
-    border: 1px solid;
-    border-radius: 8px;
-    background-color: aliceblue;
+.btn {
+    padding: 4px 20px;
+    border: 1px solid #fafafa66;
+    color:  #fafafa66;
+    border-radius: 50vh;
+    background-color: #111;
+}
+.btn:hover {
+    border: 1px solid #fafafa88;
+    color:  #fafafa88;
+    background-color: #fafafa11;
 }

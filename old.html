@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048</title>
+    <script src="old_scripts.js" ></script>
+    <link rel="stylesheet" href="styles.css">
+    
+</head>
+
+<body onload="onLoad()" style="background-color: #111;">
+    <div style="display: flex; flex-direction: column;">
+        <div style="display: flex; flex-direction: column;">
+            <div style="padding: 12px 0px">
+              <input class="btn" type="button" onclick="reset()" value="reset"></input>
+                <!-- <input type="button" onclick="start()" value="start"></input> -->
+            </div>
+            <div>
+                <canvas id="cv" width="300" height="400" onclick="onCanvasClick()" ></canvas>
+                
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
