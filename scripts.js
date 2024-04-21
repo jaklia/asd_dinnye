@@ -4,6 +4,7 @@ const Y_ZERO = 60;
 const nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
 var rs = nums.map((e) => e ** 1.234 * 3.2 * Math.SQRT2);
 var count = nums.map((e) => 0);
+var p = nums.map((e) => (1 + e) * e / 2);
 
 
 // colors by the AI in Edge
@@ -76,7 +77,7 @@ class Fruit {
         // diff.diff(this.lastPos)
         // console.log(`asd  diff after:  ${diff.x} ${diff.y} `)
         this.lastPos = this.pos;
-        diff.multiply(0.6);  //  cooling?
+        diff.multiply(0.6);
         this.pos = new Pos(this.pos.x + diff.x, this.pos.y + diff.y + 6);
     }
     collide(other) {
@@ -85,13 +86,14 @@ class Fruit {
 
         if (dist <= rsum) {
             if (this.ri === other.ri) {
+                let point = p[this.ri];
                 ++count[this.ri];
-                console.log(count);
 
                 this.pos.add(other.pos.newDiff(this.pos).multiply(0.5));
+                //  this.lastPos = this.pos.copy();
                 this.ri = (this.ri + 1) % rs.length;
                 this.r = rs[this.ri];
-                return true;
+                return point;
             } else {
                 let diff = rsum - dist;
                 let a1 = 2 * diff * other.r / rsum ** 2;
@@ -120,23 +122,27 @@ class Fruit {
                 // console.log(`d1(${d1.x},${d1.y}) `)
                 // console.log(`d2(${d2.x},${d2.y}) `)
 
-                //this.lastPos = this.pos.copy().diff(d1)
+                // this.lastPos = this.pos.copy().diff(d1);
                 this.pos.add(d1);
 
-                //other.lastPos = other.pos.copy().diff(d2)
+                //  other.lastPos = other.pos.copy().diff(d2);
                 other.pos.add(d2);
             }
         }
-        return false;
+        return 0;
     }
     keepInside(maxX, maxY) {
         if (this.pos.x < this.r) {
             // this.lastPos = this.pos.copy()
+            let d_x = this.pos.x - this.lastPos.x;
             this.pos.x = this.r;
+            this.lastPos.x = this.pos.x + d_x;
         }
         if (this.pos.x > maxX - this.r) {
             //this.lastPos = this.pos.copy()
+            let d_x = this.pos.x - this.lastPos.x;
             this.pos.x = maxX - this.r;
+            this.lastPos.x = this.pos.x + d_x;
         }
         if (this.pos.y > maxY - this.r) {
             let d_y = this.pos.y - this.lastPos.y;
@@ -150,12 +156,13 @@ class Scene {
     constructor() {
         this.dropPoint = WIDTH / 2;
         this.nextItem = Math.floor(Math.random() * 5);
+        this.points = 0;
 
         // generate random fruits, 
         // need less from the bigger ones, and more from the smaller ones
         //  well, turns out, the +1  at the end is really important...  
         this.fruits = null;
-        this.fruits = Array(16).fill().map((_) => {
+        this.fruits = Array(3).fill().map((_) => {
             let r = Math.floor(5 - Math.log2(Math.random() * (2 ** 5) + 1));
             // console.log(r)
             return new Fruit(
@@ -174,22 +181,22 @@ class Scene {
             f.step();
         }
 
-        for (let it = 1; it <= 16; ++it) {
-            //  wtf, black magic here
+        for (let it = 1; it <= 32; ++it) {
             for (let i = 0; i < this.fruits.length - 1; ++i) {
-                for (let j = 0; j < this.fruits.length; ++j) {
+                for (let j = i + 1; j < this.fruits.length; ++j) {
                     if (i === j) continue;
 
-                    let merged = this.fruits[i].collide(this.fruits[j]);
-                    if (merged) {
+                    let point = this.fruits[i].collide(this.fruits[j]);
+                    if (point > 0) {
                         this.fruits.splice(j, 1);
                         --j;
+                        this.points += point;
+                        console.log(this.points);
                     }
                 }
             }
 
             for (let f of this.fruits) {
-                // keep 'em inside the "box"
                 f.keepInside(WIDTH, HEIGHT);
             }
         }
@@ -214,6 +221,7 @@ class Scene {
 
 var scene;
 var canvas = document.getElementById('cv');
+var px = document.getElementById('points');
 var ctx; //= canvas.getContext('2d');
 var timer;
 
@@ -236,6 +244,7 @@ function mouseMoveHandler(e) {
 }
 
 function onLoad() {
+    px = document.getElementById('points');
     canvas = document.getElementById('cv');
     ctx = canvas.getContext('2d');
     reset();
@@ -246,6 +255,7 @@ function start() {
     timer = setInterval(() => {
         scene.step();
         requestAnimationFrame(reDrawScene);
+        px.value = scene.points;
     }, 40);
 }
 function reset() {
@@ -255,6 +265,7 @@ function reset() {
     canvas = document.getElementById('cv');
     ctx = canvas.getContext('2d');
     scene = new Scene();
+    px.value = 0;
     reDrawScene();
 }
 
