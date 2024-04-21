@@ -10,8 +10,17 @@
     border-radius: 50vh;
     background-color: #111;
 }
-.btn:hover {
+.btn:hover:enabled {
     border: 1px solid #fafafa88;
     color:  #fafafa88;
     background-color: #fafafa11;
+}
+
+
+.btn-row {
+    display: flex; 
+    flex-direction: row; 
+    justify-content: space-between;
+    width: 300px;
+    padding: 12px 0px;
 }
