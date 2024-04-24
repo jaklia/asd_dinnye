@@ -69,6 +69,7 @@ class Fruit {
         this.r = rs[r];
         this.ri = r;
         this.m = m;
+        this.rotation = 0;
     }
     step() {
         //console.log(`fruit step: ${this.r}`)
@@ -90,7 +91,7 @@ class Fruit {
                 ++count[this.ri];
 
                 this.pos.add(other.pos.newDiff(this.pos).multiply(0.5));
-                //  this.lastPos = this.pos.copy();
+                this.lastPos = this.pos.copy();
                 this.ri = (this.ri + 1) % rs.length;
                 this.r = rs[this.ri];
                 return point;
@@ -150,6 +151,17 @@ class Fruit {
             this.lastPos.y = this.pos.y + d_y;
         }
     }
+    rotate() {
+        let dx = this.pos.x - this.lastPos.x;
+        let dr = dx / this.r;
+        this.rotation += dr;
+        let pi2 = Math.PI * 2;
+        if (this.rotation > pi2) {
+            this.rotation -= pi2;
+        } else if (this.rotation < 0) {
+            this.rotation += pi2;
+        }
+    }
 }
 
 class Scene {
@@ -199,6 +211,9 @@ class Scene {
             for (let f of this.fruits) {
                 f.keepInside(WIDTH, HEIGHT);
             }
+        }
+        for (let f of this.fruits) {
+            f.rotate();
         }
     }
     setDropPoint(x) {
@@ -286,6 +301,12 @@ function drawFruit(a) {
     ctx.closePath();
     ctx.stroke();
     ctx.fill();
+    //
+    let dx = a.r * Math.cos(a.rotation);
+    let dy = a.r * Math.sin(a.rotation);
+    ctx.moveTo(a.pos.x, a.pos.y);
+    ctx.lineTo(a.pos.x + dx, a.pos.y + dy);
+    ctx.stroke();
 }
 
 function drawTriangle(x) {
